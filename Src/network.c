@@ -205,10 +205,6 @@ void link_state_changed(void)
 
 }
 
-uint8_t* Network_GetMQTTBrokerIP(void)
-{
-    return gWIZNETINFO.logserver;
-}
 
 bool Network_IsNetworkReady(void)
 {

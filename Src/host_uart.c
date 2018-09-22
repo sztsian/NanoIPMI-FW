@@ -42,8 +42,8 @@ void HostUART_InitSol(uint16_t port)
     wait_connect = false;
     throttle_timer = 0;
     sock_fd = socket(SOCK_SOL, Sn_MR_TCP, (rand()&0x7fff)+0x8000, SF_IO_NONBLOCK/*|SF_TCP_NODELAY*/);
-    if(sock_fd >= 0)
-        rc = connect(sock_fd, Network_GetMQTTBrokerIP(), port);
+    /* if(sock_fd >= 0)
+        rc = connect(sock_fd, Network_GetMQTTBrokerIP(), port);*/
     if(rc == SOCK_OK)
         connected = true;
     else if(rc == SOCK_BUSY)

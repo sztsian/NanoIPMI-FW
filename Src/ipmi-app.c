@@ -2,8 +2,6 @@
 #include "ipmi-app.h"
 #include "network.h"
 #include "dhcp.h"
-#include "MQTTClient.h"
-#include "MQTT-Plat.h"
 #include <pb_encode.h>
 #include <pb_decode.h>
 #include "control-channel.pb.h"
@@ -14,8 +12,6 @@
 #include "app-version.h"
 
 
-static Network mqtt_net;
-static MQTTClient mqtt_client = DefaultClient;
 static char TOPIC_EVENT_MSG[40], TOPIC_STATUS_MSG[40], TOPIC_CMD_MSG[40], TOPIC_SOL_MSG[40];
 static bool is_ID_function_on, OS_monitor_enabled;
 static volatile uint32_t OS_monitor_return_sent;
@@ -63,7 +59,7 @@ static void handleMessage(Command *cmd)
     }
 }
 
-static int publishStruct(void * data, const pb_field_t fields[], const char* topic, enum QoS qos)
+/* static int publishStruct(void * data, const pb_field_t fields[], const char* topic, enum QoS qos)
 {
     int rc;
     static uint8_t buffer[64];
@@ -86,7 +82,7 @@ static int publishStruct(void * data, const pb_field_t fields[], const char* top
         return FAILURE;
     }
     return SUCCESS;
-}
+}*/
 
 static void reportStatus(void)
 {
@@ -123,13 +119,13 @@ static void reportStatus(void)
             },
         };
 
-        publishStruct(&s, Status_fields, TOPIC_STATUS_MSG, QOS0);
+        //publishStruct(&s, Status_fields, TOPIC_STATUS_MSG, QOS0);
         lastReport = HAL_GetTick();
     }
 
 }
 
-static void messageArrived(MessageData* md)
+/* static void messageArrived(MessageData* md)
 {
     MQTTMessage* message = md->message;
 
@@ -152,7 +148,7 @@ static void solMessageArrived(MessageData* md)
     if(pb_decode(&stream, Sol_fields, &cmd)){
         HostUART_InitSol(cmd.portNum);
     }
-}
+}*/
 
 static int IPMIApp_InitConn(void)
 {
@@ -162,7 +158,7 @@ static int IPMIApp_InitConn(void)
     char* topic = TOPIC_CMD_MSG;
 
     LOG_DBG("IPMIApp_InitConn called");
-    MQTTPlat_NetworkInit(&mqtt_net);
+    /*MQTTPlat_NetworkInit(&mqtt_net);
     rc = MQTTPlat_NetworkConnect(&mqtt_net, "dummy", 1883);
     if(rc != SUCCESS){
         LOG_INFO("Failed to connect to broker");
@@ -199,7 +195,8 @@ static int IPMIApp_InitConn(void)
     rc = MQTTSubscribe(&mqtt_client, TOPIC_SOL_MSG, QOS1, solMessageArrived);
     LOG_DBG("MQTTSubscribe() = %d", rc);
 
-    return rc;
+    return rc;*/
+    return 0;
 }
 
 void IPMIApp_HostUART_RecvCallback(uint8_t data)
@@ -255,7 +252,7 @@ void IPMIApp_EventCallback(uint8_t event)
         OS_monitor_enabled = false;
     }
 
-    publishStruct(&s, Event_fields, TOPIC_EVENT_MSG, QOS0);
+    //publishStruct(&s, Event_fields, TOPIC_EVENT_MSG, QOS0);
 }
 
 static void btnDetection(void)
@@ -300,17 +297,6 @@ void IPMIApp_Task(void)
     }
     if(!Network_IsNetworkReady())
         return;
-    if(!MQTTIsConnected(&mqtt_client)){
-        initTopics(getHostnamefromDHCP());
-        if(IPMIApp_InitConn() == SUCCESS){
-            LOG_INFO("control channel established");
-            // sayHello();
-        }
-    }
-    else{
-        MQTTYield(&mqtt_client, 150);
-        reportStatus();
-    }
 }
 
 void NEC_ReceiveInterrupt(NEC_FRAME f)
