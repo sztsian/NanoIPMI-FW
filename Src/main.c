@@ -54,7 +54,6 @@
 #include "network.h"
 #include "ipmi-app.h"
 #include "led.h"
-#include "nec_decode.h"
 #include "fwupdate.h"
 #include "host_uart.h"
 #include "stm32f1xx_ll_usart.h"
@@ -120,7 +119,7 @@ uint8_t BTN_GetEvent(void)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
     if(GPIO_Pin == IR_Pin){
-        NEC_HandleEXTI();
+       // NEC_HandleEXTI();
     }else if(GPIO_Pin == BTN_Pin){
         btnDetectionTask();
     }
@@ -169,7 +168,7 @@ int main(void)
   printf("  \r\n\r\n");
   LOG_INFO("MCU Initialized");
   HAL_ADCEx_Calibration_Start(&hadc1);
-  NEC_Init();
+  //NEC_Init();
   HostUART_Init();
   Network_ChipInit();
   Network_AppInit();
