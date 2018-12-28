@@ -274,7 +274,7 @@ static void btnDetection(void)
 
 void IPMIApp_Task(void)
 {
-    if(OS_monitor_enabled){
+/*     if(OS_monitor_enabled){
         if(HAL_GetTick()-OS_monitor_fed > 60000+5000){
             LOG_INFO("OS Monitor reset triggered");
             IPMIApp_EventCallback(Event_EventType_DOGTRIGGERED);
@@ -292,7 +292,7 @@ void IPMIApp_Task(void)
             HostUART_Send('\r');
             OS_monitor_return_sent ++ ;
         }
-    }
+    } */
     btnDetection();
     if(irReceived) {
         irReceived = false;
