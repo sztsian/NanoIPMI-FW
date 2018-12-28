@@ -129,16 +129,44 @@ static void reportStatus(void)
 
 }
 
+static void handlePlainMessage(MQTTMessage *message)
+{
+    char* payloadptr;
+    payloadptr = message->payload;
+    LOG_DBG("handlePlainMessage: %s", *payloadptr);
+    switch(*payloadptr){
+        case 'r':
+            //reset
+            ATX_PowerCommand(Command_PowerCommand_PowerOp_RESET);
+            break;
+        case 's':
+            //start
+            ATX_PowerCommand(Command_PowerCommand_PowerOp_ON);
+            break;
+        case 'h':
+            //halt
+            ATX_PowerCommand(Command_PowerCommand_PowerOp_OFF);
+            break;
+    }
+}
+
 static void messageArrived(MessageData* md)
 {
     MQTTMessage* message = md->message;
+    int testlen;
+    testlen = (int)message->payloadlen;
+    LOG_DBG("messageArrived length: %d", testlen);
 
-    LOG_DBG("messageArrived %d", (int)message->payloadlen);
-
-    Command cmd;
-    pb_istream_t stream = pb_istream_from_buffer(message->payload, message->payloadlen);
-    if(pb_decode(&stream, Command_fields, &cmd))
-        handleMessage(&cmd);
+    if (testlen == 1)
+    {
+        handlePlainMessage(message);
+    } else {
+        Command cmd;
+        pb_istream_t stream = pb_istream_from_buffer(message->payload, message->payloadlen);
+        if(pb_decode(&stream, Command_fields, &cmd)){
+            handleMessage(&cmd);
+        }
+    }
 }
 
 static void solMessageArrived(MessageData* md)
