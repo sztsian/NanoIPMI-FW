@@ -10,7 +10,7 @@
 #include "led.h"
 #include "ipmi-app.h"
 
-wiz_NetInfo gWIZNETINFO = { .mac = {0x78,0xCA,0x83,0x40,0x01,0x08},
+wiz_NetInfo gWIZNETINFO = { .mac = {0x78,0xCA,0x83,0x40,0x01,0x07},
                             .ip = {192, 168, 1, 80},
                             .sn = {255, 255, 255, 0},
                             .gw = {192, 168, 1, 1},

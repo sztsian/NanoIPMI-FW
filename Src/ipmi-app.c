@@ -16,7 +16,7 @@
 
 static Network mqtt_net;
 static MQTTClient mqtt_client = DefaultClient;
-static char TOPIC_EVENT_MSG[40], TOPIC_STATUS_MSG[40], TOPIC_CMD_MSG[40], TOPIC_SOL_MSG[40];
+static char TOPIC_EVENT_MSG[40], TOPIC_STATUS_MSG[40], TOPIC_CMD_MSG[40], TOPIC_SOL_MSG[40], TOPIC_POWER_MSG[40];
 static bool is_ID_function_on, OS_monitor_enabled;
 static volatile uint32_t OS_monitor_return_sent;
 static volatile uint32_t OS_monitor_fed;
@@ -32,6 +32,7 @@ static void initTopics(const char* hostname)
     snprintf(TOPIC_STATUS_MSG, sizeof(TOPIC_STATUS_MSG)-1, "/status/%s", hostname);
     snprintf(TOPIC_CMD_MSG, sizeof(TOPIC_CMD_MSG)-1, "/command/%s", hostname);
     snprintf(TOPIC_SOL_MSG, sizeof(TOPIC_SOL_MSG)-1, "/sol/%s", hostname);
+    snprintf(TOPIC_POWER_MSG, sizeof(TOPIC_POWER_MSG)-1, "%s/POWER", TOPIC_STATUS_MSG);
 }
 
 static void handleMessage(Command *cmd)
@@ -88,6 +89,23 @@ static int publishStruct(void * data, const pb_field_t fields[], const char* top
     return SUCCESS;
 }
 
+static int publishPlain(const char* data, const char* topic, enum QoS qos)
+{
+    MQTTMessage msg = {
+        .qos = qos,
+        .retained = 0,
+        .dup = 0,
+        .payload = &data,
+        .payloadlen = strlen(&data)
+    };
+    int rc = MQTTPublish(&mqtt_client, topic, &msg);
+    if(rc != SUCCESS){
+        LOG_WARN("%s failed with %d", topic, rc);
+        return FAILURE;
+    }
+    return SUCCESS;
+}
+
 static void reportStatus(void)
 {
     bool encode_fanRPM(pb_ostream_t *stream, const pb_field_t *field, void * const *arg)
@@ -122,8 +140,16 @@ static void reportStatus(void)
                 .arg = NULL
             },
         };
+        char* atx_status;
+        if (ATX_GetPowerOnState()) {
+            atx_status = "ON";
+        } else {
+            atx_status = "OFF";
+        }
 
-        publishStruct(&s, Status_fields, TOPIC_STATUS_MSG, QOS0);
+        //publishStruct(&s, Status_fields, TOPIC_STATUS_MSG, QOS0);
+        publishPlain(atx_status,TOPIC_POWER_MSG,QOS0);
+        publishPlain("online",TOPIC_STATUS_MSG,QOS0);
         lastReport = HAL_GetTick();
     }
 

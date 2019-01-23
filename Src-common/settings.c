@@ -27,7 +27,7 @@ static void populate_default(struct saved_settings_t *settings)
 	settings->crc_new_fw = 0;
 	settings->sz_new_fw = 0;
 	settings->netconf = (wiz_NetInfo){ 
-							.mac = {0x78,0xCA,0x83,0x40,0x01,0x08},
+							.mac = {0x78,0xCA,0x83,0x40,0x01,0x07},
                             .ip = {192, 168, 1, 80},
                             .sn = {255, 255, 255, 0},
                             .gw = {192, 168, 1, 1},
