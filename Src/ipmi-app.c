@@ -95,8 +95,8 @@ static int publishPlain(const char* data, const char* topic, enum QoS qos)
         .qos = qos,
         .retained = 0,
         .dup = 0,
-        .payload = &data,
-        .payloadlen = strlen(&data)
+        .payload = data,
+        .payloadlen = strlen(data)
     };
     int rc = MQTTPublish(&mqtt_client, topic, &msg);
     if(rc != SUCCESS){
